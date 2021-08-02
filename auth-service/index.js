@@ -1,39 +1,35 @@
-require('dotenv').config();
-const express = require('express');
-const amqp = require('amqplib/callback_api');
+require("dotenv").config();
+const express = require("express");
+const amqp = require("amqplib/callback_api");
 const app = express();
-const { register, login } = require('./controllers/auth.controller');
-const mongoose = require('mongoose');
-const { LOGIN_USER } = require('./constants/constants');
+const { register, login } = require("./controllers/auth.controller");
+const mongoose = require("mongoose");
 
-mongoose
-  .connect(process.env.MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then((_) => {
-    console.log('connected to database');
-    amqp.connect(process.env.AMQP_URI, (error0, connection) => {
-      if (error0) {
-        throw error0;
-      }
+app.use(express.json());
 
-      connection.createChannel((error1, channel) => {
-        if (error1) {
-          throw error1;
-        }
+exports.queues = {
+  register: "register",
+  registerFinished: "registerFinished",
+};
 
-        channel.assertQueue(LOGIN_USER, {
-          durable: false,
-        });
+amqp.connect(process.env.AMQP_URI, (error0, connection) => {
+  if (error0) {
+    throw error0;
+  }
 
-        app.post('/users/register', register(channel));
+  connection.createChannel((error1, channel) => {
+    if (error1) {
+      throw error1;
+    }
 
-        app.post('/users/login', login(channel));
+    app.post("/auth/register", register);
+    app.post("/auth/login", login)
 
-        app.listen(3001, () => {
-          console.log('started listening on port 3000');
-        });
-      });
+    app.listen(3001, () => {
+      console.log("started listening on port 3001");
     });
   });
+  process.on("beforeExit", () => {
+    connection.close();
+  });
+});
