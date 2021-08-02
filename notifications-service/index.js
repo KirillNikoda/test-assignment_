@@ -20,8 +20,8 @@ amqp.connect(process.env.AMQP_URI, (error0, connection) => {
     let transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
-        user: 'knikodait@gmail.com', // generated ethereal user
-        pass: 'uromin65', // generated ethereal password
+        user: process.env.EMAIL, // generated ethereal user
+        pass: process.env.PASSWORD, // generated ethereal password
       },
     });
 
