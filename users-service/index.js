@@ -2,10 +2,11 @@ require("dotenv").config();
 const express = require("express");
 const amqp = require("amqplib/callback_api");
 const mongoose = require("mongoose");
-const { createUser } = require("./controllers/user.controller");
+const { createUser, getUser, updateUser} = require("./controllers/user.controller");
 const { User } = require("./models/user.model");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken")
+const {authMiddleware} = require("./middlewares/auth");
 
 const queues = {
   register: "register",
@@ -76,6 +77,9 @@ mongoose
             user: newUser
           })
         })
+
+        app.get("/users/id/:id", getUser);
+        app.put("/users/:id", authMiddleware, updateUser)
 
         app.listen("3002", () => {
           console.log("started on port 3002");
