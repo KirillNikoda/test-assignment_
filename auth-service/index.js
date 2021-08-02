@@ -22,8 +22,8 @@ amqp.connect(process.env.AMQP_URI, (error0, connection) => {
       throw error1;
     }
 
-    app.post("/auth/register", register);
-    app.post("/auth/login", login)
+    app.post("/auth/register", register(channel));
+    app.post("/auth/login", login(channel))
 
     app.listen(3001, () => {
       console.log("started listening on port 3001");
